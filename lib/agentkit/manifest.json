@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "product": "pipmcp",
+  "credential": "PIPMCP_API_KEY",
+  "skills": [
+    {
+      "name": "pipmcp-qdrant",
+      "description": "Connect AI agents to Qdrant Cloud using one PipMCP API key and actual hosted tool discovery."
+    }
+  ],
+  "files": {
+    "skills/pipmcp-qdrant/SKILL.md": "24c76e4b897bfdf2592a9caee67a1847d077e22d11460bb97c160f6aad429178"
+  }
+}
