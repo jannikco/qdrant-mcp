@@ -1,0 +1,394 @@
+{
+  "schemaVersion": 1,
+  "id": "qdrant-mcp",
+  "kind": "provider-connector",
+  "artifactType": "connector",
+  "qualityVersion": 2,
+  "title": "Qdrant Cloud MCP server",
+  "description": "List collections, query a supplied vector, and only after reviewing point IDs approve an upsert into the same collection. Re-query to inspect provider results; dimensions and collection access remain provider-enforced.",
+  "status": "ready",
+  "verification": "mock-only",
+  "releaseEligible": true,
+  "maintainer": "jannikco",
+  "license": "MIT",
+  "product": "pipmcp",
+  "appSlug": "qdrant",
+  "appName": "Qdrant Cloud",
+  "operationIds": [
+    "list_collections",
+    "query_points",
+    "upsert_points"
+  ],
+  "sourceRevision": "0ae3040e4b4a72a1f754342281110cb117d4cdde9dedeab5f7c18da018a5c369",
+  "evidence": [
+    "Actual tools/call and direct-provider request contract tests"
+  ],
+  "provenance": [
+    "https://raw.githubusercontent.com/qdrant/qdrant/master/docs/redoc/master/openapi.json"
+  ],
+  "attributionSlug": "github-qdrant-mcp",
+  "connectorId": "qdrant",
+  "connector": {
+    "id": "qdrant",
+    "name": "Qdrant Cloud",
+    "version": "0.1.0",
+    "baseUrl": "https://{QDRANT_HOST}:6333",
+    "auth": {
+      "type": "header",
+      "env": "QDRANT_API_KEY",
+      "header": "api-key"
+    },
+    "description": "Inspect collections, query supplied vectors and explicitly approve point upserts on a Qdrant Cloud DNS endpoint.",
+    "tools": [
+      {
+        "name": "list_collections",
+        "description": "List collections on the configured Qdrant Cloud cluster.",
+        "method": "GET",
+        "path": "/collections",
+        "readOnly": true,
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        },
+        "bindings": {
+          "path": [],
+          "query": {},
+          "body": {}
+        },
+        "sampleArguments": {},
+        "provenance": [
+          "https://raw.githubusercontent.com/qdrant/qdrant/master/docs/redoc/master/openapi.json"
+        ]
+      },
+      {
+        "name": "query_points",
+        "description": "Read nearest points for a numeric query vector. Vector dimension must match the selected collection.",
+        "method": "POST",
+        "path": "/collections/{collection_name}/points/query",
+        "readOnly": true,
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "collection_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "query": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "maxItems": 4096
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "with_payload": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "collection_name",
+            "query"
+          ],
+          "additionalProperties": false
+        },
+        "bindings": {
+          "path": [
+            "collection_name"
+          ],
+          "query": {},
+          "body": {
+            "query": "query",
+            "limit": "limit",
+            "with_payload": "with_payload"
+          }
+        },
+        "sampleArguments": {
+          "collection_name": "documents",
+          "query": [
+            0.1,
+            0.2,
+            0.3
+          ],
+          "limit": 5,
+          "with_payload": true
+        },
+        "provenance": [
+          "https://raw.githubusercontent.com/qdrant/qdrant/master/docs/redoc/master/openapi.json"
+        ]
+      },
+      {
+        "name": "upsert_points",
+        "description": "Explicitly approved point insertion/update. Existing IDs are overwritten; acknowledged is not proof an asynchronous operation completed.",
+        "method": "PUT",
+        "path": "/collections/{collection_name}/points",
+        "readOnly": false,
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "collection_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "points": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 36,
+                        "format": "uuid"
+                      }
+                    ]
+                  },
+                  "vector": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 1,
+                    "maxItems": 4096
+                  },
+                  "payload": {
+                    "type": "object",
+                    "maxProperties": 50,
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "id",
+                  "vector"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 100
+            },
+            "wait": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "collection_name",
+            "points"
+          ],
+          "additionalProperties": false
+        },
+        "bindings": {
+          "path": [
+            "collection_name"
+          ],
+          "query": {
+            "wait": "wait"
+          },
+          "body": {
+            "points": "points"
+          }
+        },
+        "sampleArguments": {
+          "collection_name": "documents",
+          "points": [
+            {
+              "id": 1,
+              "vector": [
+                0.1,
+                0.2,
+                0.3
+              ],
+              "payload": {
+                "source": "fixture"
+              }
+            }
+          ],
+          "wait": true
+        },
+        "provenance": [
+          "https://raw.githubusercontent.com/qdrant/qdrant/master/docs/redoc/master/openapi.json"
+        ]
+      }
+    ],
+    "provenance": [
+      "https://raw.githubusercontent.com/qdrant/qdrant/master/docs/redoc/master/openapi.json"
+    ],
+    "sourceEvidence": [
+      {
+        "url": "https://raw.githubusercontent.com/qdrant/qdrant/master/docs/redoc/master/openapi.json",
+        "sha256": "a8dab6917779c13ef6babcf4834a968fb65b95d34979a7479d1f607bffe84ed8",
+        "checkedAt": "2026-11-08T13:24:07.469650+00:00",
+        "method": "https-get"
+      }
+    ],
+    "verification": "mock-only",
+    "providerLiveValidation": "not-run",
+    "hostVariables": [
+      "QDRANT_HOST"
+    ],
+    "allowedHostSuffixes": [
+      "cloud.qdrant.io"
+    ],
+    "sampleEnvironment": {
+      "QDRANT_HOST": "fixture-cluster.eu-west-2-0.aws.cloud.qdrant.io"
+    },
+    "workflow": {
+      "name": "Inspect and update vector records",
+      "description": "List collections, query a supplied vector, and only after reviewing point IDs approve an upsert into the same collection. Re-query to inspect provider results; dimensions and collection access remain provider-enforced.",
+      "steps": [
+        "list_collections",
+        "query_points",
+        "upsert_points"
+      ]
+    },
+    "repoId": "qdrant-mcp",
+    "appSlug": "qdrant",
+    "product": "pipmcp",
+    "artifactType": "connector",
+    "sourceRevision": "0ae3040e4b4a72a1f754342281110cb117d4cdde9dedeab5f7c18da018a5c369",
+    "capabilityEvidence": {
+      "local": {
+        "level": "Tested",
+        "operations": [
+          {
+            "name": "list_collections",
+            "level": "Tested",
+            "evidenceRefs": [
+              "Provider request/stdio contract tests"
+            ],
+            "method": "contract-fixture"
+          },
+          {
+            "name": "query_points",
+            "level": "Tested",
+            "evidenceRefs": [
+              "Provider request/stdio contract tests"
+            ],
+            "method": "contract-fixture"
+          },
+          {
+            "name": "upsert_points",
+            "level": "Tested",
+            "evidenceRefs": [
+              "Provider request/stdio contract tests"
+            ],
+            "method": "contract-fixture"
+          }
+        ],
+        "evidenceRefs": [
+          "Provider request/stdio contract tests"
+        ],
+        "mode": "local"
+      },
+      "managed": {
+        "level": "Documented",
+        "operations": [
+          {
+            "name": "list_collections",
+            "level": "Documented",
+            "evidenceRefs": [],
+            "method": "documentation"
+          },
+          {
+            "name": "query_points",
+            "level": "Documented",
+            "evidenceRefs": [],
+            "method": "documentation"
+          },
+          {
+            "name": "upsert_points",
+            "level": "Documented",
+            "evidenceRefs": [],
+            "method": "documentation"
+          }
+        ],
+        "evidenceRefs": [],
+        "mode": "managed"
+      }
+    },
+    "managedAvailability": {
+      "status": "import-required",
+      "integration": "openapi-to-mcp",
+      "checkedAt": "2026-11-08T13:20:45.156456+00:00"
+    }
+  },
+  "capabilityEvidence": {
+    "local": {
+      "level": "Tested",
+      "operations": [
+        {
+          "name": "list_collections",
+          "level": "Tested",
+          "evidenceRefs": [
+            "Provider request/stdio contract tests"
+          ],
+          "method": "contract-fixture"
+        },
+        {
+          "name": "query_points",
+          "level": "Tested",
+          "evidenceRefs": [
+            "Provider request/stdio contract tests"
+          ],
+          "method": "contract-fixture"
+        },
+        {
+          "name": "upsert_points",
+          "level": "Tested",
+          "evidenceRefs": [
+            "Provider request/stdio contract tests"
+          ],
+          "method": "contract-fixture"
+        }
+      ],
+      "evidenceRefs": [
+        "Provider request/stdio contract tests"
+      ],
+      "mode": "local"
+    },
+    "managed": {
+      "level": "Documented",
+      "operations": [
+        {
+          "name": "list_collections",
+          "level": "Documented",
+          "evidenceRefs": [],
+          "method": "documentation"
+        },
+        {
+          "name": "query_points",
+          "level": "Documented",
+          "evidenceRefs": [],
+          "method": "documentation"
+        },
+        {
+          "name": "upsert_points",
+          "level": "Documented",
+          "evidenceRefs": [],
+          "method": "documentation"
+        }
+      ],
+      "evidenceRefs": [],
+      "mode": "managed"
+    }
+  },
+  "utility": {
+    "problem": "List collections, query a supplied vector, and only after reviewing point IDs approve an upsert into the same collection. Re-query to inspect provider results; dimensions and collection access remain provider-enforced.",
+    "output": "Actual provider API results through local MCP tools"
+  },
+  "providerDocs": "https://raw.githubusercontent.com/qdrant/qdrant/master/docs/redoc/master/openapi.json"
+}

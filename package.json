@@ -1,0 +1,21 @@
+{
+  "name": "qdrant-mcp",
+  "version": "0.2.0",
+  "description": "List collections, query a supplied vector, and only after reviewing point IDs approve an upsert into the same collection. Re-query to inspect provider results; dimensions and collection access remain provider-enforced.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "qdrant-mcp": "server.mjs"
+  },
+  "scripts": {
+    "start": "node example.mjs",
+    "server": "node server.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.4.0"
+  }
+}
